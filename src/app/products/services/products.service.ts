@@ -16,6 +16,8 @@ interface Options {
 export class ProductsService {
   private http = inject(HttpClient);
 
+  private productsCache = new Map();
+
   getProducts(options: Options): Observable<ProductsResponse> {
 
     const {limit = 9, offset = 0, gender = ''} = options;
