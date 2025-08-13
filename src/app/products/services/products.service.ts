@@ -54,4 +54,18 @@ export class ProductsService {
     )
   }
 
+
+  getProductById(id: string): Observable<Product> {
+
+    if (this.productCache.has(id)) {
+      return of(this.productCache.get(id)!);
+    }
+
+    return this.http.get<Product>(`${baseUrl}/products/${id}`).pipe(
+      delay(1500),
+      tap((product) => this.productCache.set(id, product)),
+    )
+  }
+
+
 }
