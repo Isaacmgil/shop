@@ -5,7 +5,7 @@
     <!-- Slides -->
     @for (image of images(); track $index) {
     <div class="swiper-slide">
-      <img [src]="image | productImage" alt="Product" class="w-full object-cover" />
+      <img [src]="image | productImage" alt="Product" class="w-full object-cover animate-fadeIn" />
     </div>
     }
   </div>
