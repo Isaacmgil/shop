@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Product, ProductsResponse } from '../interfaces/product.interface';
-import { delay, Observable, of, tap } from 'rxjs';
+import { Gender, Product, ProductsResponse } from '../interfaces/product.interface';
+import { delay, Observable, of, tap, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { User } from '@/auth/interfaces/user.interface';
 
 const baseUrl = environment.baseUrl;
 
@@ -12,7 +13,21 @@ interface Options {
   gender?: number;
 }
 
-@Injectable({providedIn: 'root'})
+const emptyProduct: Product = {
+  id: 'new',
+  title: '',
+  price: 0,
+  description: '',
+  slug: '',
+  stock: 0,
+  sizes: [],
+  gender: Gender.Men,
+  tags: [],
+  images: [],
+  user: {} as User
+}
+
+@Injectable({ providedIn: 'root' })
 export class ProductsService {
   private http = inject(HttpClient);
 
@@ -21,7 +36,7 @@ export class ProductsService {
 
   getProducts(options: Options): Observable<ProductsResponse> {
 
-    const {limit = 9, offset = 0, gender = ''} = options;
+    const { limit = 9, offset = 0, gender = '' } = options;
 
     const key = `${limit}-${offset}-${gender}`;
     if (this.productsCache.has(key)) {
@@ -57,6 +72,10 @@ export class ProductsService {
 
   getProductById(id: string): Observable<Product> {
 
+    if(id === 'new'){
+      return of(emptyProduct);
+    }
+
     if (this.productCache.has(id)) {
       return of(this.productCache.get(id)!);
     }
@@ -65,6 +84,24 @@ export class ProductsService {
       delay(1500),
       tap((product) => this.productCache.set(id, product)),
     )
+  }
+
+  updateProduct(id: string, productLike: Partial<Product>): Observable<Product> {
+    return this.http.patch<Product>(`${baseUrl}/products/${id}`, productLike).pipe
+    (tap((product) => this.updateProductCache(product)));
+  }
+
+  updateProductCache(product: Product) {
+    const productId = product.id;
+
+    this.productCache.set(productId, product);
+
+    this.productsCache.forEach((productResponse) => {
+      const productIndex = productResponse.products.findIndex((p) => p.id === productId)
+      if (productIndex !== -1) {
+        productResponse.products[productIndex] = product
+      }
+    })
   }
 
 

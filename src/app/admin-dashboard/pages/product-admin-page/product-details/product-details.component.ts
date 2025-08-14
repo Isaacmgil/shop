@@ -4,6 +4,7 @@ import { ProductCarouselComponent } from "@/products/components/product-carousel
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormUtils } from '@/form-utils';
 import { FormErrorLabelComponent } from "@/shared/components/form-error-label/form-error-label.component";
+import { ProductsService } from '../../../../products/services/products.service';
 
 @Component({
   selector: 'app-product-details',
@@ -12,6 +13,7 @@ import { FormErrorLabelComponent } from "@/shared/components/form-error-label/fo
 })
 export class ProductDetailsComponent {
   product = input.required<Product>();
+  productsService = inject(ProductsService);
 
   formBuilder = inject(FormBuilder);
 
@@ -24,7 +26,7 @@ export class ProductDetailsComponent {
     sizes: [['']],
     images: [[]],
     tags: [''],
-    gender: ['men', [Validators.required, Validators.pattern('/men|women|kid|unisex/')]]
+    gender: ['', [Validators.required, Validators.pattern('men|women|kid|unisex')]]
 
 
   });
@@ -38,35 +40,38 @@ export class ProductDetailsComponent {
 
   setFormValue(formLike: Partial<Product>) {
     this.productForm.reset(this.product() as any)
-    this.productForm.patchValue({tags: formLike.tags?.join(', ') });
+    this.productForm.patchValue({ tags: formLike.tags?.join(', ') });
     // this.productForm.patchValue(formLike as any);
   }
 
-  onSizeClicked(size: string){
+  onSizeClicked(size: string) {
     const currentSizes = this.productForm.value.sizes ?? [];
-    if ( currentSizes.includes(size)){
+    if (currentSizes.includes(size)) {
       currentSizes.splice(currentSizes.indexOf(size), 1);
-    }else {
+    } else {
       currentSizes.push(size);
     }
 
-    this.productForm.patchValue({sizes: currentSizes});
+    this.productForm.patchValue({ sizes: currentSizes });
   }
 
 
-  onSubmit(){
+  onSubmit() {
     const isValid = this.productForm.valid;
     this.productForm.markAllAsTouched
 
-    if(!isValid) return
+    if (!isValid) return
 
     const formValue = this.productForm.value;
 
     const productLike: Partial<Product> = {
       ...(formValue as any),
-      tags: formValue.tags?.toLowerCase().split(',').map(tag => tag.trim()) ?? [],
+      tags: formValue.tags?.toLowerCase().split(',').map((tag) => tag.trim()) ?? [],
     };
 
-    console.log({productLike})
-  }
+    this.productsService.updateProduct(this.product().id, productLike)
+    .subscribe((product) => {
+        console.log('Producto actualizado')
+      });
+ }
 }

@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ProductTableComponent } from "@/products/components/product-table/product-table.component";
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { ProductsService } from '@/products/services/products.service';
 import { PaginationService } from '@/shared/components/pagination/pagination.service';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -8,7 +8,7 @@ import { PaginationComponent } from '@/shared/components/pagination/pagination.c
 
 @Component({
   selector: 'app-products-admin-page',
-  imports: [ProductTableComponent, PaginationComponent],
+  imports: [ProductTableComponent, PaginationComponent, RouterLink],
   templateUrl: './products-admin-page.component.html',
 })
 export class ProductsAdminPageComponent {
