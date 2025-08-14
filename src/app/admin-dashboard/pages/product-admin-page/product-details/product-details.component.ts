@@ -1,10 +1,12 @@
 import { Product } from '@/products/interfaces/product.interface';
-import { Component, inject, input } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { ProductCarouselComponent } from "@/products/components/product-carousel/product-carousel.component";
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormUtils } from '@/form-utils';
 import { FormErrorLabelComponent } from "@/shared/components/form-error-label/form-error-label.component";
 import { ProductsService } from '../../../../products/services/products.service';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-product-details',
@@ -14,6 +16,17 @@ import { ProductsService } from '../../../../products/services/products.service'
 export class ProductDetailsComponent {
   product = input.required<Product>();
   productsService = inject(ProductsService);
+  router = inject(Router);
+  productCreated = signal(false);
+
+  imageFileList: FileList|undefined = undefined;
+  tempImages = signal<string[]>([]);
+
+  imagesToCarousel = computed(() => {
+    const currentProductImages = [...this.product().images, ...this.tempImages(),];
+
+    return currentProductImages;
+  })
 
   formBuilder = inject(FormBuilder);
 
@@ -56,7 +69,7 @@ export class ProductDetailsComponent {
   }
 
 
-  onSubmit() {
+  async onSubmit() {
     const isValid = this.productForm.valid;
     this.productForm.markAllAsTouched
 
@@ -69,9 +82,61 @@ export class ProductDetailsComponent {
       tags: formValue.tags?.toLowerCase().split(',').map((tag) => tag.trim()) ?? [],
     };
 
-    this.productsService.updateProduct(this.product().id, productLike)
-    .subscribe((product) => {
-        console.log('Producto actualizado')
-      });
- }
+    if (this.product().id === 'new') {
+      const product = await firstValueFrom(
+        this.productsService.createProduct(productLike, this.imageFileList)
+      );
+
+      this.router.navigate(['/admin/products', product.id]);
+
+    } else {
+      await firstValueFrom(
+        this.productsService.updateProduct(this.product().id, productLike, this.imageFileList)
+      )
+    }
+
+    this.productCreated.set(true);
+    setTimeout(() => {
+      this.productCreated.set(false)
+    }, 3000);
+  }
+
+  async onDeleteProduct() {
+    const productId = this.product().id;
+
+    if (productId === 'new') {
+      console.warn('No se puede eliminar un producto que aún no ha sido creado.');
+      return;
+    }
+
+    const confirmed = window.confirm(`¿Estás seguro de que quieres eliminar "${this.product().title}"?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      this.productsService.deleteProduct(productId);
+      console.log('Producto eliminado con éxito.');
+
+      this.router.navigate(['/admin/products']);
+
+    } catch (error) {
+      console.error('Ocurrió un error al eliminar el producto:', error);
+    }
+  }
+
+  onFilesChanged(event: Event) {
+    const filelist = (event.target as HTMLInputElement).files;
+    this.imageFileList = filelist ?? undefined;
+
+    const imageUrls = Array.from(filelist ?? []).map(
+      file => URL.createObjectURL(file)
+    );
+
+    this.tempImages.set(imageUrls);
+  }
+
+
 }
+

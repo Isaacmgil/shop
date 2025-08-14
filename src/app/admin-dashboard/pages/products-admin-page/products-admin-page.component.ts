@@ -19,6 +19,8 @@ export class ProductsAdminPageComponent {
 
   productsPerPage = signal(10);
 
+
+
   productsResource = rxResource({
     request: () => ({page: this.paginationService.currentPage() - 1,
       limit: this.productsPerPage()}),

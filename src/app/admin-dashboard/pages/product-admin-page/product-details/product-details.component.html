@@ -4,7 +4,7 @@
 <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
   <!-- Datos generales -->
   <div class="flex flex-col gap-2">
-    <h2 class="text-2xl font-bold h-12">Datos generales</h2>
+    <h2 class="text-2xl font-bold h-12">General info</h2>
     <input type="text" placeholder="Título" class="input input-bordered w-full" formControlName="title"
       [class.border-red-500]="productForm.get('title')?.errors ?? false" />
     <form-error-label [control]="productForm.get('title')!"></form-error-label>
@@ -13,21 +13,21 @@
       [class.border-red-500]="productForm.get('slug')?.errors ?? false" />
     <form-error-label [control]="productForm.get('slug')!"></form-error-label>
 
-    <textarea class="textarea textarea-bordered" placeholder="Descripción" rows="6" formControlName="description"
+    <textarea class="textarea textarea-bordered w-full" placeholder="Descripción" rows="9" formControlName="description"
       [class.border-red-500]="productForm.get('description')?.errors ?? false"></textarea>
     <form-error-label [control]="productForm.get('description')!"></form-error-label>
 
-    <h2 class="text-lg font-bold">Datos de venta</h2>
+    <h2 class="text-lg font-bold">Sale info</h2>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
       <div>
-        <input type="number" placeholder="Precio" class="input input-bordered w-full" formControlName="price"
+        <input type="number" placeholder="Price" class="input input-bordered w-full" formControlName="price"
           [class.border-red-500]="productForm.get('price')?.errors ?? false" />
         <form-error-label [control]="productForm.get('price')!"></form-error-label>
       </div>
 
       <div>
-        <input type="number" placeholder="Inventario" class="input input-bordered w-full" formControlName="stock"
+        <input type="number" placeholder="stock" class="input input-bordered w-full" formControlName="stock"
           [class.border-red-500]="productForm.get('stock')?.errors ?? false" />
         <form-error-label [control]="productForm.get('stock')!"></form-error-label>
       </div>
@@ -64,6 +64,13 @@
         [class.btn-secondary]="productForm.value.sizes?.includes(size)">{{ size }}</button>
       }
     </div>
+
+
+    <button
+      class=" btn btn-error bottom-1 mb-45 text-amber-50 bg-red-500 fixed left w-80 animate-fadeIn cursor-pointer hover:bg-red-700"
+      (click)="onDeleteProduct()">
+      Delete Product
+    </button>
   </div>
 
   <!-- Imágenes -->
@@ -72,12 +79,26 @@
       <button class="btn btn-secondary" type="submit">
         <!-- <span class="loading loading-spinner loading-sm"></span> -->
 
-        Guardar
+        Save changes
       </button>
     </div>
 
-    <product-carousel [images]="product().images" />
+    <product-carousel [images]="imagesToCarousel()" />
 
-    <input type="file" class="file-input file-input-bordered w-full mt-4" />
+    <input type="file" multiple accept="images/*" (change)="onFilesChanged($event)"
+      class="file-input file-input-bordered w-full mt-4" />
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+      @for (image of tempImages(); track image) {
+      <img [src]="image" alt="temporal image" class="w-full object-cover rounded-xl">
+      }
+    </div>
+
   </div>
 </form>
+
+@if (this.productCreated()) {
+<div class="alert alert-success bg-teal-500 fixed mb-3 bottom-4 right-4 w-80 animate-fadeIn">
+  <span>Product succesfully updated!</span>
+</div>
+}
