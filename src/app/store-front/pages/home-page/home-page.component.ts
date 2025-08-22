@@ -1,13 +1,15 @@
 import { ProductCardComponent } from '@/products/components/product-card/product-card.component';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ProductsService } from '@/products/services/products.service';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { PaginationComponent } from "@/shared/components/pagination/pagination.component";
 import { PaginationService } from '@/shared/components/pagination/pagination.service';
+import { RouterLink } from '@angular/router';
+import { ProductImagePipe } from '@/products/pipes/product-image-pipe';
 
 @Component({
   selector: 'app-home-page',
-  imports: [ProductCardComponent, PaginationComponent],
+  imports: [ProductCardComponent, PaginationComponent, RouterLink, ProductImagePipe],
   templateUrl: './home-page.component.html',
 })
 export class HomePageComponent {
@@ -33,6 +35,15 @@ export class HomePageComponent {
       });
     },
   });
+
+
+  showFavoritesPopup = signal(false);
+
+  favoritesCount = computed(() => this.productsService.favorites().length);
+
+  toggleFavoritesPopup(): void {
+    this.showFavoritesPopup.update(value => !value);
+  }
 
 
  }

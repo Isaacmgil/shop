@@ -3,7 +3,7 @@
 
 <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
   <!-- Datos generales -->
-  <div class="flex flex-col gap-2">
+  <div class="flex flex-col gap-2 w-auto h-full">
     <h2 class="text-2xl font-bold h-12">General info</h2>
     <input type="text" placeholder="Título" class="input input-bordered w-full" formControlName="title"
       [class.border-red-500]="productForm.get('title')?.errors ?? false" />
@@ -65,16 +65,10 @@
       }
     </div>
 
-
-    <button
-      class=" btn btn-error bottom-1 mb-45 text-amber-50 bg-red-500 fixed left w-80 animate-fadeIn cursor-pointer hover:bg-red-700"
-      (click)="onDeleteProduct()">
-      Delete Product
-    </button>
   </div>
 
   <!-- Imágenes -->
-  <div class="flex flex-col gap-2">
+  <div class="flex flex-col w-auto">
     <div class="flex justify-end h-12">
       <button class="btn btn-secondary" type="submit">
         <!-- <span class="loading loading-spinner loading-sm"></span> -->
@@ -97,8 +91,14 @@
   </div>
 </form>
 
+  <button
+    class="btn btn-error bottom-1 top-0 text-amber-50 bg-red-500 left w-100 animate-fadeIn cursor-pointer hover:bg-red-700"
+    (click)="onDeleteProduct()">
+    Delete Product
+  </button>
+
 @if (this.productCreated()) {
-<div class="alert alert-success bg-teal-500 fixed mb-3 bottom-4 right-4 w-80 animate-fadeIn">
+<div class="z-10 alert alert-success bg-teal-500 fixed mb-3 bottom-4 right-4 w-80 animate-fadeIn">
   <span>Product succesfully updated!</span>
 </div>
 }

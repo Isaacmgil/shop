@@ -19,7 +19,7 @@ export class ProductDetailsComponent {
   router = inject(Router);
   productCreated = signal(false);
 
-  imageFileList: FileList|undefined = undefined;
+  imageFileList: FileList | undefined = undefined;
   tempImages = signal<string[]>([]);
 
   imagesToCarousel = computed(() => {
@@ -45,7 +45,7 @@ export class ProductDetailsComponent {
   });
 
 
-  sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  sizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44'];
 
   ngOnInit(): void {
     this.setFormValue(this.product())
@@ -116,7 +116,7 @@ export class ProductDetailsComponent {
     }
 
     try {
-      this.productsService.deleteProduct(productId);
+      await firstValueFrom(this.productsService.deleteProduct(productId));
       console.log('Producto eliminado con éxito.');
 
       this.router.navigate(['/admin/products']);
@@ -139,4 +139,3 @@ export class ProductDetailsComponent {
 
 
 }
-

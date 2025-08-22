@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Gender, Product, ProductsResponse } from '../interfaces/product.interface';
 import { delay, Observable, of, tap, map, forkJoin, switchMap } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -30,7 +30,7 @@ const emptyProduct: Product = {
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
   private http = inject(HttpClient);
-
+  public favorites = signal<Product[]>([])
   private productsCache = new Map<string, ProductsResponse>();
   private productCache = new Map<string, Product>();
 
@@ -135,6 +135,10 @@ export class ProductsService {
     );
   }
 
+  clearFavorites() {
+    this.favorites.set([]);
+  }
+
   updateProductCache(product: Product) {
     const productId = product.id;
 
@@ -168,6 +172,17 @@ export class ProductsService {
       .pipe(
         map((resp) => resp.fileName)
       )
+  }
+
+  toggleFavorite(product: Product): void {
+    const currentFavorites = this.favorites()
+    const isFavorite = currentFavorites.some(p => p.id === product.id);
+
+    if (isFavorite) {
+      this.favorites.set(currentFavorites.filter(p => p.id !== product.id));
+    } else {
+      this.favorites.update(favs => [...favs, product]);
+    }
   }
 
 }

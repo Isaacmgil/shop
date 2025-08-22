@@ -1,18 +1,61 @@
-<h1 class="text-3xl font-bold font-montserrat">All products</h1>
+<h1 class="text-3xl mt-3 font-bold font-montserrat">All products</h1>
 <h2 class="text-xl mb-5">For everyone</h2>
 
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-2 gap-3">
   @for (product of productsResource.value()?.products; track $index) {
 
-    <product-card [product]="product"></product-card>
+  <product-card [product]="product"></product-card>
 
   }
 
   @empty {
-    <p>No products found!</p>
+  <p>No products found!</p>
   }
 
 </div>
 
-<app-pagination [pages]="productsResource.value()?.pages ?? 0" [currentPage]="paginationService.currentPage()"  />
+<app-pagination [pages]="productsResource.value()?.pages ?? 0" [currentPage]="paginationService.currentPage()" />
+
+<div class="fixed bottom-8 right-8 z-50">
+  <div class="relative group">
+    <button class="btn btn-secondary btn-circle shadow-lg hover:bg-red-800" (click)="toggleFavoritesPopup()">
+      <svg width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#fff4e5"
+        stroke="#ffffff">
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+          <path
+            d="M2 9.1371C2 14 6.01943 16.5914 8.96173 18.9109C10 19.7294 11 20.5 12 20.5C13 20.5 14 19.7294 15.0383 18.9109C17.9806 16.5914 22 14 22 9.1371C22 4.27416 16.4998 0.825464 12 5.50063C7.50016 0.825464 2 4.27416 2 9.1371Z"
+            fill="#fff4e5"></path>
+        </g>
+      </svg>
+    </button>
+
+    @if (favoritesCount() > 0) {
+    <span
+      class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
+      {{ favoritesCount() }}
+    </span>
+    }
+
+    @if (showFavoritesPopup()) {
+    <div
+      class="absolute bottom-16 right-0 w-80 bg-base-100 rounded-box shadow-2xl p-4 transform transition-all duration-300 ease-in-out origin-bottom-right">
+      <h4 class="text-lg font-bold mb-4">My Favorites</h4>
+      @if (productsService.favorites().length === 0) {
+      <p class="text-gray-500">You still don't have favorite products yet!</p>
+      } @else {
+      <div class="flex flex-col gap-2 max-h-64 overflow-y-auto">
+        @for (fav of productsService.favorites(); track fav.id) {
+        <a [routerLink]="['/product/', fav.id]"
+          class="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-colors">
+          <img [src]="fav.images[0] | productImage" [alt]="fav.title" class="w-12 h-12 object-cover rounded-md">
+          <span class="truncate">{{ fav.title }}</span>
+        </a>
+        }
+      </div>
+      }
+    </div>
+    }
+  </div>
