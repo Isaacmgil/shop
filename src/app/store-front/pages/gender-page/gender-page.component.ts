@@ -1,16 +1,17 @@
 
 import { ProductsService } from '@/products/services/products.service';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { ProductCardComponent } from "@/products/components/product-card/product-card.component";
 import { PaginationComponent } from '@/shared/components/pagination/pagination.component';
 import { PaginationService } from '@/shared/components/pagination/pagination.service';
+import { ProductImagePipe } from '@/products/pipes/product-image-pipe';
 
 @Component({
   selector: 'gender-page',
-  imports: [ProductCardComponent, PaginationComponent],
+  imports: [ProductCardComponent, PaginationComponent, RouterLink, ProductImagePipe],
   templateUrl: './gender-page.component.html',
 })
 
@@ -36,5 +37,14 @@ export class GenderPageComponent {
       });
     },
   });
+
+
+  showFavoritesPopup = signal(false);
+
+  favoritesCount = computed(() => this.productsService.favorites().length);
+
+  toggleFavoritesPopup(): void {
+    this.showFavoritesPopup.update(value => !value);
+  }
 
 }
