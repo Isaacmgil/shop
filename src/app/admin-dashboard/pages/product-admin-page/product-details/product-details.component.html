@@ -40,9 +40,9 @@
 
     <div class="grid grid-cols-4 gap-2">
       <button type="button" class="btn btn-sm" [class.btn-primary]="productForm.value.gender === 'men'"
-        (click)="productForm.patchValue({gender: 'men'})">Masculino</button>
+        (click)="productForm.patchValue({gender: 'men'})">Men</button>
       <button type="button" class="btn btn-sm" [class.btn-accent]="productForm.value.gender === 'women'"
-        (click)="productForm.patchValue({gender: 'women'})">Femenino</button>
+        (click)="productForm.patchValue({gender: 'women'})">Women</button>
       <button type="button" class="btn btn-sm" [class.btn-warning]="productForm.value.gender === 'kid'"
         (click)="productForm.patchValue({gender: 'kid'})">Kid</button>
       <button type="button" class="btn btn-sm" [class.btn-secondary]="productForm.value.gender === 'unisex'"
