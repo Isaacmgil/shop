@@ -1,10 +1,10 @@
 import { ProductsService } from '@/products/services/products.service';
 import { Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink, Router } from '@angular/router'; // ⚠️ Added Router
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { ProductCarouselComponent } from "@/products/components/product-carousel/product-carousel.component";
 import { ProductImagePipe } from '@/products/pipes/product-image-pipe';
-import { AuthService } from '@/auth/services/auth-service'; // ⚠️ Added AuthService
+import { AuthService } from '@/auth/services/auth-service';
 
 @Component({
   selector: 'app-product-page',
@@ -15,8 +15,8 @@ export class ProductPageComponent {
 
   activatedRoute = inject(ActivatedRoute);
   productService = inject(ProductsService);
-  authService = inject(AuthService); // ⚠️ Inyectamos el servicio de autenticación
-  router = inject(Router); // ⚠️ Inyectamos el router
+  authService = inject(AuthService);
+  router = inject(Router);
 
   productIdSlug = this.activatedRoute.snapshot.params['idSlug'];
 
