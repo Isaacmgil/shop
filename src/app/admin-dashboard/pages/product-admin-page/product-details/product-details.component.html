@@ -38,9 +38,7 @@
       [class.border-red-500]="productForm.get('tags')?.errors ?? false" />
     <form-error-label [control]="productForm.get('tags')!"></form-error-label>
 
-    <!-- Botones para el género -->
     <div class="grid grid-cols-4 gap-2">
-      <!-- <button class="btn btn-sm btn-outline">Masculino</button> -->
       <button type="button" class="btn btn-sm" [class.btn-primary]="productForm.value.gender === 'men'"
         (click)="productForm.patchValue({gender: 'men'})">Masculino</button>
       <button type="button" class="btn btn-sm" [class.btn-accent]="productForm.value.gender === 'women'"

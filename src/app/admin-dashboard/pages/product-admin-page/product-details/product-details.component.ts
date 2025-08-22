@@ -45,7 +45,7 @@ export class ProductDetailsComponent {
   });
 
 
-  sizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44'];
+  sizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44'];
 
   ngOnInit(): void {
     this.setFormValue(this.product())
