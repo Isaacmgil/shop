@@ -7,6 +7,7 @@ import { User } from '@/auth/interfaces/user.interface';
 
 const baseUrl = environment.baseUrl;
 const FAVORITES_STORAGE_KEY = 'favorites';
+const PRODUCTCART_STORAGE_KEY = 'products';
 
 interface Options {
   limit?: number;
@@ -31,15 +32,18 @@ const emptyProduct: Product = {
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
   private http = inject(HttpClient);
-  public favorites = signal<Product[]>([])
+  public cart = signal<Product[]>([]);
+  public favorites = signal<Product[]>([]);
   private productsCache = new Map<string, ProductsResponse>();
   private productCache = new Map<string, Product>();
 
   constructor() {
     this.loadFavorites();
+    this.loadProductCart();
 
     effect(() => {
       this.saveFavorites();
+      this.saveProductsCart();
     });
   }
 
@@ -56,11 +60,32 @@ export class ProductsService {
     }
   }
 
+  private loadProductCart(): void {
+    const productCartString = localStorage.getItem(PRODUCTCART_STORAGE_KEY);
+    if (productCartString) {
+      try {
+        const productCartArray: Product[] = JSON.parse(productCartString);
+        this.cart.set(productCartArray);
+      } catch (e) {
+        console.error('Error parsing products bag from localStorage', e);
+        this.cart.set([]);
+      }
+    }
+  }
+
   private saveFavorites(): void {
     try {
       localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(this.favorites()));
     } catch (e) {
       console.error('Error saving favorites to localStorage', e);
+    }
+  }
+
+  private saveProductsCart(): void {
+    try {
+      localStorage.setItem(PRODUCTCART_STORAGE_KEY, JSON.stringify(this.cart()));
+    } catch (e) {
+      console.error('Error saving products in the bag to localStorage', e);
     }
   }
 
@@ -74,9 +99,21 @@ export class ProductsService {
     }
   }
 
+  public toggleCart(product: Product): void {
+    const currentCart = this.cart();
+    const inCart = currentCart.some(p => p.id === product.id);
+    if (inCart) {
+      this.cart.set(currentCart.filter(p => p.id !== product.id));
+    } else {
+      this.cart.update(cartProduct => [...cartProduct, product]);
+    }
+  }
+
   public clearFavorites(): void {
     this.favorites.set([]);
+    this.cart.set([]);
     localStorage.removeItem(FAVORITES_STORAGE_KEY);
+    localStorage.removeItem(PRODUCTCART_STORAGE_KEY);
   }
 
   getProducts(options: Options): Observable<ProductsResponse> {
@@ -141,9 +178,12 @@ export class ProductsService {
           ...productLike,
           images: [...currentImages, ...imageNames],
         })),
-        switchMap((updatedProduct) => this.http.patch<Product>(`${baseUrl}/products/${id}`, updatedProduct)
-        ),
-        tap((product) => this.updateProductCache(product))
+        switchMap((updatedProduct) => this.http.patch<Product>(`${baseUrl}/products/${id}`, updatedProduct)),
+        tap((product) => {
+          this.updateProductCache(product);
+          this.productsCache.clear();
+          this.productCache.clear();
+        })
       );
 
 
@@ -162,9 +202,12 @@ export class ProductsService {
           ...productLike,
           images: [...currentImages, ...imageNames],
         })),
-        switchMap((updatedProduct) => this.http.post<Product>(`${baseUrl}/products/`, updatedProduct)
-        ),
-        tap((product) => this.updateProductCache(product))
+        switchMap((updatedProduct) => this.http.post<Product>(`${baseUrl}/products/`, updatedProduct)),
+        tap((product) => {
+          this.updateProductCache(product);
+          this.productsCache.clear();
+          this.productCache.clear();
+        })
       );
 
     // return this.http.post<Product>(`${baseUrl}/products`, productLike).pipe

@@ -1,34 +1,43 @@
 import { ProductsService } from '@/products/services/products.service';
 import { Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProductCarouselComponent } from "@/products/components/product-carousel/product-carousel.component";
-import { ProductImagePipe } from '@/products/pipes/product-image-pipe';
 import { AuthService } from '@/auth/services/auth-service';
+import { map, switchMap } from 'rxjs';
+import { FavoritesComponent } from "@/store-front/components/favorites/favorites.component";
+import { ShoppingCartComponent } from "@/store-front/components/shopping-cart/shopping-cart.component";
 
 @Component({
   selector: 'app-product-page',
-  imports: [ProductCarouselComponent, RouterLink, ProductImagePipe],
+  imports: [ProductCarouselComponent, FavoritesComponent, ShoppingCartComponent],
   templateUrl: './product-page.component.html',
 })
 export class ProductPageComponent {
 
   activatedRoute = inject(ActivatedRoute);
-  productService = inject(ProductsService);
+  productsService = inject(ProductsService);
   authService = inject(AuthService);
   router = inject(Router);
 
-  productIdSlug = this.activatedRoute.snapshot.params['idSlug'];
-
   productResource = rxResource({
-    request: () => ({ idSlug: this.productIdSlug }),
+    request: () => this.activatedRoute.paramMap,
     loader: ({ request }) => {
-      return this.productService.getProductByIdSlug(request.idSlug);
+      return request.pipe(
+        map(params => params.get('idSlug')),
+        switchMap(idSlug => {
+          if (!idSlug) {
+            return this.productsService.getProductByIdSlug('not-found');
+          }
+          return this.productsService.getProductByIdSlug(idSlug);
+        })
+      );
     }
   });
 
   selectedSize = signal<string | null>(null);
   showFavoritesPopup = signal(false);
+  showProductsCart = signal(false);
   isAuthenticated = computed(() => this.authService.isLoggedIn());
 
   isFavorite = computed(() => {
@@ -36,7 +45,7 @@ export class ProductPageComponent {
     if (!product || !product.id) {
       return false;
     }
-    return this.productService.favorites().some(p => p.id === product.id);
+    return this.productsService.favorites().some(p => p.id === product.id);
   });
 
   onSelectSize(size: string): void {
@@ -51,14 +60,20 @@ export class ProductPageComponent {
 
     const product = this.productResource.value();
     if (product) {
-      this.productService.toggleFavorite(product);
+      this.productsService.toggleFavorite(product);
     }
   }
 
-  toggleFavoritesPopup(): void {
-    this.showFavoritesPopup.update(value => !value);
-  }
+  onToggleCart(): void {
+    if (!this.isAuthenticated()) {
+      this.router.navigateByUrl('/auth/login');
+      return;
+    }
 
-  favoritesCount = computed(() => this.productService.favorites().length);
+    const product = this.productResource.value();
+    if (product) {
+      this.productsService.toggleCart(product);
+    }
+  }
 
 }

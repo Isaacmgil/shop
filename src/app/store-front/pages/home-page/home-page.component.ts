@@ -1,15 +1,15 @@
 import { ProductCardComponent } from '@/products/components/product-card/product-card.component';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ProductsService } from '@/products/services/products.service';
-import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { PaginationComponent } from "@/shared/components/pagination/pagination.component";
 import { PaginationService } from '@/shared/components/pagination/pagination.service';
-import { RouterLink } from '@angular/router';
-import { ProductImagePipe } from '@/products/pipes/product-image-pipe';
+import { ShoppingCartComponent } from "@/store-front/components/shopping-cart/shopping-cart.component";
+import { FavoritesComponent } from "@/store-front/components/favorites/favorites.component";
 
 @Component({
   selector: 'app-home-page',
-  imports: [ProductCardComponent, PaginationComponent, RouterLink, ProductImagePipe],
+  imports: [ProductCardComponent, PaginationComponent, ShoppingCartComponent, FavoritesComponent],
   templateUrl: './home-page.component.html',
 })
 export class HomePageComponent {
@@ -27,8 +27,8 @@ export class HomePageComponent {
   // });
 
   productsResource = rxResource({
-    request: () => ({page: this.paginationService.currentPage() - 1}),
-    loader: ({request}) => {
+    request: () => ({ page: this.paginationService.currentPage() - 1 }),
+    loader: ({ request }) => {
 
       return this.productsService.getProducts({
         offset: request.page * 9
@@ -36,16 +36,6 @@ export class HomePageComponent {
     },
   });
 
-
-  showFavoritesPopup = signal(false);
-
-  favoritesCount = computed(() => this.productsService.favorites().length);
-
-  toggleFavoritesPopup(): void {
-    this.showFavoritesPopup.update(value => !value);
-  }
-
-
- }
+}
 
 
